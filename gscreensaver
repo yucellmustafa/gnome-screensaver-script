@@ -1,0 +1,73 @@
+#!/bin/bash
+
+displays=""
+while read id; do
+    displays="$displays $id"
+done< <(xvinfo | sed -n 's/^screen #\([0-9]\+\)$/\1/p')
+
+DIR=$( cd "$( dirname "$0" )" && pwd)
+delay=60
+
+usage() {
+    echo "Usage: $0 [-t <idle time (s)>] -l [-c <commands>]"
+    echo "  -t <idle time (s)>  - time in seconds before screen saver is started"
+    echo "  -c <commands>       - commands to run when screen saver is started"
+    echo "  -l                  - Lock screen instead of starting screensaver" 
+    echo "  -h                  - This help message"
+    exit 1;
+}
+
+while getopts ":t:l?c:h?" options; do
+    case "${options}" in
+        t)delay=${OPTARG} ;;
+        l)lock=true ;;
+        c)commands=${OPTARG} ;;
+        h)usage ;;
+        :) echo "Error: -${OPTARG} requires an argument."; usage ;;
+        *)usage ;;
+    esac
+done
+
+
+checkFullscreen()
+{
+    # loop through every display looking for a fullscreen window
+    for display in $displays; do
+        #get id of active window and clean output
+        activ_win_id=`DISPLAY=:0.${display} xprop -root _NET_ACTIVE_WINDOW`
+        activ_win_id=${activ_win_id:40:9}
+        
+        # Check if Active Window (the foremost window) is in fullscreen state
+        isActivWinFullscreen=`DISPLAY=:0.${display} xprop -id $activ_win_id | grep _NET_WM_STATE_FULLSCREEN`
+        if [[ "$isActivWinFullscreen" != *NET_WM_STATE_FULLSCREEN* ]];then
+            oldIdle=0
+            $commands
+            while sleep $((1)); do
+                idle=$(python3 ./idle-time.py)
+                if [ $oldIdle -ge $idle ]; then
+                    if [ $lock ]; then
+                        xdg-screensaver lock
+                    fi
+                    break
+                fi
+                oldIdle=$idle
+            done
+	    fi
+    done
+}
+
+# If argument is not integer quit.
+if [[ ${delay} = *[^0-9]* ]]; then
+    echo "The Argument \"$1\" is not valid, not an integer"
+    exit 1
+fi
+
+cd $DIR
+while sleep $((1)); do
+    idle=$(python3 ./idle-time.py)
+    if [ $idle -ge $delay ]; then
+        checkFullscreen
+    fi
+done
+
+exit 0
