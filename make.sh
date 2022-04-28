@@ -3,11 +3,11 @@
 make=$1
 
 if [ $make = "install" ]; then
-    sudo cp gscreensaver /usr/bin/
-    sudo cp idle-time.py /usr/bin/
+    cp gscreensaver /usr/bin/
+    cp idle-time.py /usr/bin/
 elif [ $make = "uninstall" ]; then
-    sudo rm /usr/bin/gscreensaver
-    sudo rm /usr/bin/idle-time.py
+    rm /usr/bin/gscreensaver
+    rm /usr/bin/idle-time.py
 else
-    echo "Usage: make.sh install|uninstall"
+    echo "Usage: sudo ./make.sh install|uninstall"
 fi
