@@ -10,10 +10,10 @@ delay=60
 
 usage() {
     echo "Usage: $0 [-t <idle time (s)>] -l [-c <commands>]"
-    echo "  -t <idle time (s)>  - time in seconds before screen saver is started"
-    echo "  -c <commands>       - commands to run when screen saver is started"
-    echo "  -l                  - Lock screen instead of starting screensaver" 
-    echo "  -h                  - This help message"
+    echo "  -t <idle time (s)>  - time in seconds before screensaver is started"
+    echo "  -c <commands>       - commands to run as screensaver"
+    echo "  -l                  - lock screen after screensaver" 
+    echo "  -h                  - this help message"
     exit 1;
 }
 
